@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { useStore } from "../../context/StoreContext";
@@ -7,14 +7,39 @@ import { Product } from "../../data/products";
 export default function CustomerDashboard() {
   const { user, logout } = useAuth();
   const { products } = useStore();
-  const [activeTab, setActiveTab] = useState<"overview" | "orders" | "favorites" | "profile">("overview");
-  const [favorites, setFavorites] = useState<number[]>([1, 3, 5]);
+  const [activeTab, setActiveTab] = useState<"overview" | "orders" | "favorites" | "addresses" | "payments" | "profile">("overview");
+  const [favorites, setFavorites] = useState<number[]>(() => {
+    const saved = localStorage.getItem(`wishlist_${user?.email}`);
+    return saved ? JSON.parse(saved) : [1, 3, 5];
+  });
   const [showReorder, setShowReorder] = useState<string | null>(null);
   const [showTracking, setShowTracking] = useState<string | null>(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showCancelOrder, setShowCancelOrder] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+
+  // Persist wishlist to localStorage
+  useEffect(() => {
+    if (user?.email) {
+      localStorage.setItem(`wishlist_${user.email}`, JSON.stringify(favorites));
+    }
+  }, [favorites, user?.email]);
+
+  // Address book
+  const [addresses, setAddresses] = useState([
+    { id: 1, label: "Home", street: "123 Main St", city: "New York", state: "NY", zip: "10001", isDefault: true },
+    { id: 2, label: "Work", street: "456 Office Blvd", city: "New York", state: "NY", zip: "10002", isDefault: false },
+  ]);
+  const [showAddAddress, setShowAddAddress] = useState(false);
+
+  // Payment methods
+  const [paymentMethods, setPaymentMethods] = useState([
+    { id: 1, type: "Visa", last4: "4242", expiry: "12/27", isDefault: true },
+    { id: 2, type: "Mastercard", last4: "8888", expiry: "08/26", isDefault: false },
+  ]);
+  const [showAddPayment, setShowAddPayment] = useState(false);
 
   const toggleFavorite = (productId: number) => {
     setFavorites((prev) =>
@@ -195,6 +220,8 @@ export default function CustomerDashboard() {
             { id: "overview" as const, label: "Overview", icon: "🏠" },
             { id: "orders" as const, label: "Orders", icon: "📦" },
             { id: "favorites" as const, label: "Favorites", icon: "❤️" },
+            { id: "addresses" as const, label: "Addresses", icon: "📍" },
+            { id: "payments" as const, label: "Payments", icon: "💳" },
             { id: "profile" as const, label: "Profile", icon: "👤" },
           ].map((tab) => (
             <button
@@ -402,6 +429,12 @@ export default function CustomerDashboard() {
                         >
                           Track
                         </button>
+                        <button
+                          onClick={() => setShowCancelOrder(order.id)}
+                          className="text-xs px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium"
+                        >
+                          Cancel
+                        </button>
                       </div>
                     </div>
 
@@ -482,6 +515,177 @@ export default function CustomerDashboard() {
                   ))}
                 </div>
               )}
+            </motion.div>
+          )}
+
+          {activeTab === "addresses" && (
+            <motion.div
+              key="addresses"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="bg-white rounded-2xl border border-amber-100 p-5"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-serif font-bold text-amber-900">Address Book</h3>
+                <button
+                  onClick={() => setShowAddAddress(true)}
+                  className="px-4 py-2 bg-amber-800 text-white text-sm rounded-xl hover:bg-amber-900 transition-colors"
+                >
+                  + Add Address
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {addresses.map((addr) => (
+                  <div key={addr.id} className="p-4 bg-amber-50/50 rounded-xl border border-amber-100">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">📍</span>
+                        <span className="font-medium text-amber-900">{addr.label}</span>
+                        {addr.isDefault && (
+                          <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Default</span>
+                        )}
+                      </div>
+                      <button className="text-xs text-amber-600 hover:text-amber-800">Edit</button>
+                    </div>
+                    <p className="text-sm text-amber-700">{addr.street}</p>
+                    <p className="text-sm text-amber-700">{addr.city}, {addr.state} {addr.zip}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Add Address Modal */}
+              <AnimatePresence>
+                {showAddAddress && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                    onClick={() => setShowAddAddress(false)}
+                  >
+                    <motion.div
+                      initial={{ scale: 0.9 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0.9 }}
+                      className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <h3 className="font-serif text-xl font-bold text-amber-900 mb-4">Add New Address</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-medium text-amber-700 mb-1">Label</label>
+                          <input type="text" placeholder="e.g., Home, Work" className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-amber-700 mb-1">Street Address</label>
+                          <input type="text" className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+                        </div>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <label className="block text-xs font-medium text-amber-700 mb-1">City</label>
+                            <input type="text" className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-amber-700 mb-1">State</label>
+                            <input type="text" className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-amber-700 mb-1">ZIP</label>
+                            <input type="text" className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 mt-4">
+                        <button onClick={() => setShowAddAddress(false)} className="flex-1 py-2.5 bg-amber-50 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-100">Cancel</button>
+                        <button onClick={() => { setShowAddAddress(false); showToast("Address added successfully!"); }} className="flex-1 py-2.5 bg-amber-800 text-white rounded-xl text-sm font-medium hover:bg-amber-900">Save Address</button>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
+
+          {activeTab === "payments" && (
+            <motion.div
+              key="payments"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="bg-white rounded-2xl border border-amber-100 p-5"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-serif font-bold text-amber-900">Payment Methods</h3>
+                <button
+                  onClick={() => setShowAddPayment(true)}
+                  className="px-4 py-2 bg-amber-800 text-white text-sm rounded-xl hover:bg-amber-900 transition-colors"
+                >
+                  + Add Payment
+                </button>
+              </div>
+              <div className="space-y-3">
+                {paymentMethods.map((pm) => (
+                  <div key={pm.id} className="flex items-center justify-between p-4 bg-amber-50/50 rounded-xl border border-amber-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-8 bg-gradient-to-r from-amber-600 to-amber-800 rounded flex items-center justify-center text-white text-xs font-bold">
+                        {pm.type.slice(0, 4)}
+                      </div>
+                      <div>
+                        <p className="font-medium text-amber-900">{pm.type} •••• {pm.last4}</p>
+                        <p className="text-xs text-amber-500">Expires {pm.expiry}</p>
+                      </div>
+                      {pm.isDefault && (
+                        <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Default</span>
+                      )}
+                    </div>
+                    <button className="text-xs text-amber-600 hover:text-amber-800">Remove</button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Add Payment Modal */}
+              <AnimatePresence>
+                {showAddPayment && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+                    onClick={() => setShowAddPayment(false)}
+                  >
+                    <motion.div
+                      initial={{ scale: 0.9 }}
+                      animate={{ scale: 1 }}
+                      exit={{ scale: 0.9 }}
+                      className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <h3 className="font-serif text-xl font-bold text-amber-900 mb-4">Add Payment Method</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-medium text-amber-700 mb-1">Card Number</label>
+                          <input type="text" placeholder="1234 5678 9012 3456" className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-xs font-medium text-amber-700 mb-1">Expiry Date</label>
+                            <input type="text" placeholder="MM/YY" className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-amber-700 mb-1">CVV</label>
+                            <input type="text" placeholder="123" className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 mt-4">
+                        <button onClick={() => setShowAddPayment(false)} className="flex-1 py-2.5 bg-amber-50 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-100">Cancel</button>
+                        <button onClick={() => { setShowAddPayment(false); showToast("Payment method added!"); }} className="flex-1 py-2.5 bg-amber-800 text-white rounded-xl text-sm font-medium hover:bg-amber-900">Add Card</button>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           )}
 
@@ -783,6 +987,59 @@ export default function CustomerDashboard() {
                   </>
                 );
               })()}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Cancel Order Modal */}
+      <AnimatePresence>
+        {showCancelOrder && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowCancelOrder(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="font-serif text-xl font-bold text-amber-900 mb-2">Cancel Order</h3>
+              <p className="text-sm text-amber-600 mb-4">
+                Are you sure you want to cancel order #{showCancelOrder}? This action cannot be undone.
+              </p>
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-amber-700 mb-1">Reason for cancellation (optional)</label>
+                <select className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 bg-white">
+                  <option>Changed my mind</option>
+                  <option>Found better price elsewhere</option>
+                  <option>Ordered by mistake</option>
+                  <option>Delivery time too long</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowCancelOrder(null)}
+                  className="flex-1 py-2.5 bg-amber-50 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-100"
+                >
+                  Keep Order
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCancelOrder(null);
+                    showToast("Order cancelled successfully. Refund will be processed in 5-7 business days.");
+                  }}
+                  className="flex-1 py-2.5 bg-red-500 text-white rounded-xl text-sm font-medium hover:bg-red-600"
+                >
+                  Cancel Order
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

@@ -20,6 +20,9 @@ import ProductCard from "./components/ProductCard";
 import ProductDetail from "./components/ProductDetail";
 import CartSidebar from "./components/CartSidebar";
 import Checkout from "./components/Checkout";
+import Footer from "./components/Footer";
+import BackToTop from "./components/BackToTop";
+import StaticPage from "./components/StaticPage";
 
 // ============ AUTH SCREENS ============
 function AuthScreen() {
@@ -217,40 +220,10 @@ function StoreFront({ onGoToDashboard }: { onGoToDashboard: () => void }) {
       </main>
 
       {/* Footer */}
-      <footer className="bg-amber-900 text-amber-100 py-10 sm:py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">🏪</span>
-                <h4 className="font-serif text-lg font-bold text-white">Saveur & Co.</h4>
-              </div>
-              <p className="text-sm text-amber-300 leading-relaxed">
-                Bringing the world's finest artisanal foods to your doorstep since 2020.
-              </p>
-            </div>
-            <div>
-              <h5 className="font-semibold text-white mb-3">Quality Promise</h5>
-              <ul className="space-y-2 text-sm text-amber-300">
-                <li>✓ Ethically sourced ingredients</li>
-                <li>✓ Temperature-controlled shipping</li>
-                <li>✓ Satisfaction guaranteed</li>
-              </ul>
-            </div>
-            <div>
-              <h5 className="font-semibold text-white mb-3">Contact</h5>
-              <ul className="space-y-2 text-sm text-amber-300">
-                <li>hello@saveurco.com</li>
-                <li>1-800-SAVEUR</li>
-                <li>Mon-Fri 9am-6pm EST</li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-8 pt-6 border-t border-amber-800 text-center text-xs text-amber-400">
-            © 2026 Saveur & Co. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <Footer />
+
+      {/* Back to Top Button */}
+      <BackToTop />
 
       {/* Modals & Overlays */}
       {selectedProduct && (
@@ -305,10 +278,26 @@ function AdminPanel() {
 function AppRouter() {
   const { isAuthenticated, user } = useAuth();
   const [showStore, setShowStore] = useState(false);
+  const [currentPage, setCurrentPage] = useState<string | null>(null);
+
+  // Handle static page navigation
+  const handleNavigate = (page: string) => {
+    if (page === "home" || page === "shop") {
+      setCurrentPage(null);
+      setShowStore(true);
+    } else {
+      setCurrentPage(page);
+    }
+  };
 
   // If not authenticated, show auth screens
   if (!isAuthenticated) {
     return <AuthScreen />;
+  }
+
+  // Show static page if selected
+  if (currentPage) {
+    return <StaticPage page={currentPage} onNavigate={handleNavigate} />;
   }
 
   // Route based on role
