@@ -14,7 +14,6 @@ export default function Checkout({ onClose }: CheckoutProps) {
     email: "",
     address: "",
     city: "",
-    zip: "",
     cardNumber: "",
     expiry: "",
     cvv: "",
@@ -215,24 +214,14 @@ export default function Checkout({ onClose }: CheckoutProps) {
                     onChange={(e) => handleChange("address", e.target.value)}
                     className="w-full px-4 py-2.5 rounded-xl border border-amber-200 bg-amber-50/30 text-sm text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent"
                   />
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="text"
-                      placeholder="City"
-                      required
-                      value={formData.city}
-                      onChange={(e) => handleChange("city", e.target.value)}
-                      className="px-4 py-2.5 rounded-xl border border-amber-200 bg-amber-50/30 text-sm text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent"
-                    />
-                    <input
-                      type="text"
-                      placeholder="ZIP Code"
-                      required
-                      value={formData.zip}
-                      onChange={(e) => handleChange("zip", e.target.value)}
-                      className="px-4 py-2.5 rounded-xl border border-amber-200 bg-amber-50/30 text-sm text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    placeholder="City"
+                    required
+                    value={formData.city}
+                    onChange={(e) => handleChange("city", e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-xl border border-amber-200 bg-amber-50/30 text-sm text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent"
+                  />
                 </div>
               </div>
 

@@ -29,8 +29,8 @@ export default function CustomerDashboard() {
 
   // Address book
   const [addresses, setAddresses] = useState([
-    { id: 1, label: "Home", street: "123 Main St", city: "New York", state: "NY", zip: "10001", isDefault: true },
-    { id: 2, label: "Work", street: "456 Office Blvd", city: "New York", state: "NY", zip: "10002", isDefault: false },
+    { id: 1, label: "Home", street: "123 Main St", city: "New York", state: "NY", isDefault: true },
+    { id: 2, label: "Work", street: "456 Office Blvd", city: "New York", state: "NY", isDefault: false },
   ]);
   const [showAddAddress, setShowAddAddress] = useState(false);
 
@@ -549,7 +549,7 @@ export default function CustomerDashboard() {
                       <button className="text-xs text-amber-600 hover:text-amber-800">Edit</button>
                     </div>
                     <p className="text-sm text-amber-700">{addr.street}</p>
-                    <p className="text-sm text-amber-700">{addr.city}, {addr.state} {addr.zip}</p>
+                    <p className="text-sm text-amber-700">{addr.city}, {addr.state}</p>
                   </div>
                 ))}
               </div>
@@ -581,17 +581,13 @@ export default function CustomerDashboard() {
                           <label className="block text-xs font-medium text-amber-700 mb-1">Street Address</label>
                           <input type="text" className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
                         </div>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-2 gap-2">
                           <div>
                             <label className="block text-xs font-medium text-amber-700 mb-1">City</label>
                             <input type="text" className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-amber-700 mb-1">State</label>
-                            <input type="text" className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-medium text-amber-700 mb-1">ZIP</label>
                             <input type="text" className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
                           </div>
                         </div>
