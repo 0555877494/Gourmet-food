@@ -18,10 +18,29 @@ export default function Checkout({ onClose }: CheckoutProps) {
     expiry: "",
     cvv: "",
   });
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [couponError, setCouponError] = useState("");
+
+  const applyCoupon = () => {
+    if (couponCode.toUpperCase() === "SAVEUR10" || couponCode.toUpperCase() === "WELCOME15") {
+      setCouponApplied(true);
+      setCouponError("");
+    } else {
+      setCouponApplied(false);
+      setCouponError("Invalid coupon code");
+    }
+  };
+
+  const discount = couponApplied
+    ? couponCode.toUpperCase() === "SAVEUR10"
+      ? totalPrice * 0.1
+      : totalPrice * 0.15
+    : 0;
 
   const shipping = totalPrice > 75 ? 0 : 9.99;
-  const tax = totalPrice * 0.08;
-  const grandTotal = totalPrice + shipping + tax;
+  const tax = (totalPrice - discount) * 0.08;
+  const grandTotal = totalPrice - discount + shipping + tax;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,11 +240,60 @@ export default function Checkout({ onClose }: CheckoutProps) {
                   </div>
                 ))}
               </div>
+              {/* Coupon Code */}
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-amber-700 mb-1.5">Coupon Code</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => {
+                      setCouponCode(e.target.value);
+                      setCouponError("");
+                    }}
+                    placeholder="Enter code"
+                    disabled={couponApplied}
+                    className="flex-1 px-3 py-2 rounded-lg border border-amber-200 bg-white text-sm text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-300 disabled:bg-amber-50"
+                  />
+                  <button
+                    type="button"
+                    onClick={applyCoupon}
+                    disabled={couponApplied || !couponCode}
+                    className="px-4 py-2 bg-amber-100 text-amber-700 rounded-lg text-sm font-medium hover:bg-amber-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {couponApplied ? "✓ Applied" : "Apply"}
+                  </button>
+                </div>
+                {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
+                {couponApplied && (
+                  <p className="text-xs text-green-600 mt-1">
+                    ✓ {couponCode.toUpperCase() === "SAVEUR10" ? "10%" : "15%"} discount applied!
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCouponApplied(false);
+                        setCouponCode("");
+                      }}
+                      className="ml-2 underline"
+                    >
+                      Remove
+                    </button>
+                  </p>
+                )}
+                <p className="text-xs text-amber-400 mt-1">Try: SAVEUR10 or WELCOME15</p>
+              </div>
+
               <div className="border-t border-amber-200 pt-3 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-amber-600">Subtotal</span>
                   <span className="text-amber-800">${totalPrice.toFixed(2)}</span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-green-600">Discount</span>
+                    <span className="text-green-600">-${discount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-amber-600">Shipping</span>
                   <span className="text-amber-800">{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span>

@@ -138,7 +138,7 @@ export default function AdminProducts() {
                             onClick={() => handleDelete(product.id)}
                             className="px-2 py-1 text-xs bg-red-500 text-white rounded-md hover:bg-red-600"
                           >
-                            Confirm
+                            Delete
                           </button>
                           <button
                             onClick={() => setDeleteConfirm(null)}

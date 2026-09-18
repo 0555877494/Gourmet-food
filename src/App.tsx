@@ -102,7 +102,7 @@ function StoreFront({ onGoToDashboard }: { onGoToDashboard: () => void }) {
           </div>
           <button
             onClick={onGoToDashboard}
-            className="text-xs text-amber-600 hover:text-amber-800 font-medium flex items-center gap-1 transition-colors"
+            className="px-4 py-1.5 bg-amber-800 hover:bg-amber-900 text-white text-xs font-medium rounded-full flex items-center gap-1.5 transition-all shadow-sm hover:shadow-md"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />

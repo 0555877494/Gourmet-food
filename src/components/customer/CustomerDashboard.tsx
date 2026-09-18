@@ -10,11 +10,21 @@ export default function CustomerDashboard() {
   const [activeTab, setActiveTab] = useState<"overview" | "orders" | "favorites" | "profile">("overview");
   const [favorites, setFavorites] = useState<number[]>([1, 3, 5]);
   const [showReorder, setShowReorder] = useState<string | null>(null);
+  const [showTracking, setShowTracking] = useState<string | null>(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   const toggleFavorite = (productId: number) => {
     setFavorites((prev) =>
       prev.includes(productId) ? prev.filter((id) => id !== productId) : [...prev, productId]
     );
+  };
+
+  const showToast = (message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 3000);
   };
 
   const favoriteProducts = products.filter((p) => favorites.includes(p.id));
@@ -98,7 +108,7 @@ export default function CustomerDashboard() {
               <span className="text-sm font-medium text-amber-800 hidden sm:block">{user?.name}</span>
             </div>
             <button
-              onClick={logout}
+              onClick={() => setShowLogoutConfirm(true)}
               className="text-xs text-amber-500 hover:text-red-500 transition-colors px-2 py-1"
             >
               Logout
@@ -378,12 +388,18 @@ export default function CustomerDashboard() {
                       <span className="text-sm font-bold text-amber-900">${order.total.toFixed(2)}</span>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => setShowReorder(order.id)}
+                          onClick={() => {
+                            setShowReorder(order.id);
+                            showToast("Items added to cart!");
+                          }}
                           className="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors font-medium"
                         >
                           Reorder
                         </button>
-                        <button className="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors font-medium">
+                        <button
+                          onClick={() => setShowTracking(order.id)}
+                          className="text-xs px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors font-medium"
+                        >
                           Track
                         </button>
                       </div>
@@ -508,10 +524,16 @@ export default function CustomerDashboard() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button className="flex-1 py-3 bg-amber-800 text-white rounded-xl text-sm font-medium hover:bg-amber-900 transition-colors">
+                  <button
+                    onClick={() => setShowEditProfile(true)}
+                    className="flex-1 py-3 bg-amber-800 text-white rounded-xl text-sm font-medium hover:bg-amber-900 transition-colors"
+                  >
                     Edit Profile
                   </button>
-                  <button className="flex-1 py-3 bg-amber-50 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-100 transition-colors">
+                  <button
+                    onClick={() => setShowChangePassword(true)}
+                    className="flex-1 py-3 bg-amber-50 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-100 transition-colors"
+                  >
                     Change Password
                   </button>
                 </div>
@@ -520,6 +542,251 @@ export default function CustomerDashboard() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2"
+          >
+            <span>✓</span> {toast}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Logout Confirmation Modal */}
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowLogoutConfirm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="font-serif text-xl font-bold text-amber-900 mb-2">Logout?</h3>
+              <p className="text-sm text-amber-600 mb-4">Are you sure you want to logout?</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="flex-1 py-2.5 bg-amber-50 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={logout}
+                  className="flex-1 py-2.5 bg-red-500 text-white rounded-xl text-sm font-medium hover:bg-red-600"
+                >
+                  Logout
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Profile Modal */}
+      <AnimatePresence>
+        {showEditProfile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowEditProfile(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="font-serif text-xl font-bold text-amber-900 mb-4">Edit Profile</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-amber-700 mb-1">Name</label>
+                  <input
+                    type="text"
+                    defaultValue={user?.name}
+                    className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-amber-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    defaultValue={user?.email}
+                    className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-amber-700 mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    defaultValue={user?.phone}
+                    className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => setShowEditProfile(false)}
+                  className="flex-1 py-2.5 bg-amber-50 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowEditProfile(false);
+                    showToast("Profile updated successfully!");
+                  }}
+                  className="flex-1 py-2.5 bg-amber-800 text-white rounded-xl text-sm font-medium hover:bg-amber-900"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Change Password Modal */}
+      <AnimatePresence>
+        {showChangePassword && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowChangePassword(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="font-serif text-xl font-bold text-amber-900 mb-4">Change Password</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-amber-700 mb-1">Current Password</label>
+                  <input
+                    type="password"
+                    className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-amber-700 mb-1">New Password</label>
+                  <input
+                    type="password"
+                    className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-amber-700 mb-1">Confirm New Password</label>
+                  <input
+                    type="password"
+                    className="w-full px-3 py-2 border border-amber-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => setShowChangePassword(false)}
+                  className="flex-1 py-2.5 bg-amber-50 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowChangePassword(false);
+                    showToast("Password changed successfully!");
+                  }}
+                  className="flex-1 py-2.5 bg-amber-800 text-white rounded-xl text-sm font-medium hover:bg-amber-900"
+                >
+                  Update Password
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Order Tracking Modal */}
+      <AnimatePresence>
+        {showTracking && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowTracking(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl max-h-[80vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {(() => {
+                const order = mockOrders.find((o) => o.id === showTracking);
+                if (!order) return null;
+                return (
+                  <>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-serif text-xl font-bold text-amber-900">Order Tracking</h3>
+                      <button
+                        onClick={() => setShowTracking(null)}
+                        className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-700 hover:bg-amber-100"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div className="mb-4">
+                      <p className="text-sm text-amber-600">Order #{order.id}</p>
+                      <p className="text-xs text-amber-500">{order.date}</p>
+                    </div>
+                    <div className="relative pl-6 border-l-2 border-amber-200 space-y-4">
+                      {order.trackingSteps.map((step, i) => (
+                        <div key={i} className="relative">
+                          <div className={`absolute -left-[25px] w-4 h-4 rounded-full border-2 ${
+                            step.done ? "bg-green-500 border-green-500" : "bg-white border-amber-300"
+                          }`} />
+                          <div className="ml-2">
+                            <p className={`text-sm font-medium ${step.done ? "text-amber-900" : "text-gray-400"}`}>
+                              {step.label}
+                            </p>
+                            <p className="text-xs text-gray-500">{step.date}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => setShowTracking(null)}
+                      className="w-full mt-4 py-2.5 bg-amber-800 text-white rounded-xl text-sm font-medium hover:bg-amber-900"
+                    >
+                      Close
+                    </button>
+                  </>
+                );
+              })()}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
