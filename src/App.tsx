@@ -26,6 +26,8 @@ import BackToTop from "./components/BackToTop";
 import StaticPage from "./components/StaticPage";
 import { ProductGridSkeleton } from "./components/Skeleton";
 import { ScrollReveal, StaggerContainer, StaggerItem } from "./hooks/useScrollAnimation";
+import AnnouncementBanner from "./components/AnnouncementBanner";
+import LiveChat from "./components/LiveChat";
 
 // ============ AUTH SCREENS ============
 function AuthScreen() {
@@ -103,6 +105,9 @@ function StoreFront({ onGoToDashboard }: { onGoToDashboard: () => void }) {
         onSearchChange={setSearchQuery}
         onCartClick={() => setIsCartOpen(true)}
       />
+
+      {/* Announcement Banner */}
+      <AnnouncementBanner />
 
       {/* User Welcome Bar */}
       <div className="bg-amber-50 border-b border-amber-100">
@@ -239,6 +244,9 @@ function StoreFront({ onGoToDashboard }: { onGoToDashboard: () => void }) {
 
       {/* Back to Top Button */}
       <BackToTop />
+
+      {/* Live Chat Widget */}
+      <LiveChat />
 
       {/* Modals & Overlays */}
       {selectedProduct && (

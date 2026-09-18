@@ -56,10 +56,55 @@ export default function ProductCard({ product, onViewDetails }: ProductCardProps
           </div>
         </div>
         
-        {/* Category badge */}
-        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1 text-xs font-medium text-amber-700 border border-amber-200">
-          {product.category}
-        </div>
+        {/* Product Badge */}
+        {product.badge && (
+          <div className="absolute top-3 left-3">
+            {product.badge === 'new' && (
+              <span className="px-2 py-1 bg-blue-500 text-white text-xs font-bold rounded-full shadow-lg">
+                ✨ NEW
+              </span>
+            )}
+            {product.badge === 'sale' && (
+              <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg">
+                🔥 SALE
+              </span>
+            )}
+            {product.badge === 'bestseller' && (
+              <span className="px-2 py-1 bg-amber-500 text-white text-xs font-bold rounded-full shadow-lg">
+                ⭐ BESTSELLER
+              </span>
+            )}
+            {product.badge === 'limited' && (
+              <span className="px-2 py-1 bg-purple-500 text-white text-xs font-bold rounded-full shadow-lg">
+                💎 LIMITED
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Discount Badge */}
+        {product.discount && (
+          <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-1 shadow-lg">
+            -{product.discount}%
+          </div>
+        )}
+
+        {/* Rating badge (if no discount) */}
+        {!product.discount && (
+          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
+            <svg className="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            <span className="text-xs font-medium text-amber-700">{product.rating}</span>
+          </div>
+        )}
+
+        {/* Low Stock Warning */}
+        {product.stock < 10 && product.stock > 0 && (
+          <div className="absolute bottom-3 left-3 bg-orange-500/90 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded-full">
+            ⚠️ Only {product.stock} left!
+          </div>
+        )}
 
         {/* Quick view button */}
         <motion.button
@@ -73,14 +118,6 @@ export default function ProductCard({ product, onViewDetails }: ProductCardProps
         >
           Quick View
         </motion.button>
-
-        {/* Rating badge */}
-        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
-          <svg className="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-          <span className="text-xs font-medium text-amber-700">{product.rating}</span>
-        </div>
       </div>
 
       {/* Product Info */}
@@ -128,6 +165,11 @@ export default function ProductCard({ product, onViewDetails }: ProductCardProps
         {/* Price & Add to Cart */}
         <div className="flex items-center justify-between mt-auto pt-3 border-t border-amber-50">
           <div>
+            {product.originalPrice && (
+              <span className="text-sm text-gray-400 line-through mr-2">
+                ${product.originalPrice.toFixed(2)}
+              </span>
+            )}
             <span className="text-xl font-bold text-amber-900">
               ${product.price.toFixed(2)}
             </span>
