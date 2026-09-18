@@ -15,7 +15,7 @@ export interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string, role: UserRole) => { success: boolean; message: string };
+  login: (email: string, password: string) => { success: boolean; message: string };
   signup: (name: string, email: string, password: string, phone: string, role: "customer" | "delivery") => { success: boolean; message: string };
   logout: () => void;
   registeredUsers: RegisteredUser[];
@@ -26,20 +26,20 @@ export interface RegisteredUser {
   email: string;
   password: string;
   phone: string;
-  role: "customer" | "delivery";
+  role: UserRole;
   joinDate: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Default accounts for demo
+// Default accounts for demo — includes all three roles
 const defaultAccounts: RegisteredUser[] = [
   {
     name: "Admin User",
     email: "admin@saveurco.com",
     password: "admin123",
     phone: "1-800-SAVEUR",
-    role: "delivery", // placeholder, admin handled separately
+    role: "admin",
     joinDate: "2024-01-01",
   },
   {
@@ -60,49 +60,28 @@ const defaultAccounts: RegisteredUser[] = [
   },
 ];
 
+const avatarMap: Record<UserRole, string> = {
+  customer: "🛍️",
+  delivery: "🚴",
+  admin: "👑",
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>(defaultAccounts);
 
-  const login = (email: string, password: string, role: UserRole) => {
-    // Admin login
-    if (role === "admin") {
-      if (email === "admin@saveurco.com" && password === "admin123") {
-        setUser({
-          id: 0,
-          name: "Admin User",
-          email: "admin@saveurco.com",
-          role: "admin",
-          avatar: "👑",
-          joinDate: "2024-01-01",
-        });
-        return { success: true, message: "Welcome back, Admin!" };
-      }
-      // Also accept any credentials for admin demo
-      if (email && password) {
-        setUser({
-          id: 0,
-          name: email.split("@")[0].replace(/\b\w/g, (l) => l.toUpperCase()),
-          email,
-          role: "admin",
-          avatar: "👑",
-          joinDate: new Date().toISOString().split("T")[0],
-        });
-        return { success: true, message: "Welcome, Admin!" };
-      }
-      return { success: false, message: "Invalid admin credentials" };
+  // Auto-detect role from credentials — no role parameter needed
+  const login = (email: string, password: string) => {
+    if (!email || !password) {
+      return { success: false, message: "Please enter your email and password" };
     }
 
-    // Customer / Delivery login
+    // Search all registered accounts (includes admin, customer, delivery)
     const found = registeredUsers.find(
-      (u) => u.email === email && u.password === password && u.role === role
+      (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
     );
 
     if (found) {
-      const avatarMap: Record<string, string> = {
-        customer: "🛍️",
-        delivery: "🚴",
-      };
       setUser({
         id: registeredUsers.indexOf(found) + 1,
         name: found.name,
@@ -115,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { success: true, message: `Welcome back, ${found.name}!` };
     }
 
-    return { success: false, message: "Invalid email, password, or role selection" };
+    return { success: false, message: "Invalid email or password" };
   };
 
   const signup = (
@@ -125,7 +104,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     phone: string,
     role: "customer" | "delivery"
   ) => {
-    const exists = registeredUsers.find((u) => u.email === email);
+    const exists = registeredUsers.find(
+      (u) => u.email.toLowerCase() === email.toLowerCase()
+    );
     if (exists) {
       return { success: false, message: "An account with this email already exists" };
     }
@@ -140,11 +121,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     setRegisteredUsers((prev) => [...prev, newUser]);
-
-    const avatarMap: Record<string, string> = {
-      customer: "🛍️",
-      delivery: "🚴",
-    };
 
     setUser({
       id: registeredUsers.length + 1,

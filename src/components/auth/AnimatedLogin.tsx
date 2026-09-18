@@ -1,37 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth, UserRole } from "../../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 
 interface AnimatedLoginProps {
   onSwitchToSignup: () => void;
 }
-
-const roleConfig = {
-  customer: {
-    label: "Customer",
-    icon: "🛍️",
-    gradient: "from-amber-500 to-orange-600",
-    bgGlow: "bg-amber-500/20",
-    accent: "amber",
-    description: "Order fine artisanal foods",
-  },
-  delivery: {
-    label: "Delivery Agent",
-    icon: "🚴",
-    gradient: "from-emerald-500 to-teal-600",
-    bgGlow: "bg-emerald-500/20",
-    accent: "emerald",
-    description: "Manage deliveries & routes",
-  },
-  admin: {
-    label: "Admin",
-    icon: "👑",
-    gradient: "from-purple-500 to-indigo-600",
-    bgGlow: "bg-purple-500/20",
-    accent: "purple",
-    description: "Manage the entire platform",
-  },
-};
 
 // Floating food particles
 const particles = [
@@ -49,7 +22,6 @@ const particles = [
 
 export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) {
   const { login } = useAuth();
-  const [activeRole, setActiveRole] = useState<UserRole>("customer");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -58,8 +30,6 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
   const [isLoading, setIsLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  const config = roleConfig[activeRole];
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -67,7 +37,7 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
     setIsLoading(true);
 
     setTimeout(() => {
-      const result = login(email, password, activeRole);
+      const result = login(email, password);
       if (result.success) {
         setSuccess(result.message);
       } else {
@@ -75,12 +45,6 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
       }
       setIsLoading(false);
     }, 1500);
-  };
-
-  const switchRole = (role: UserRole) => {
-    setActiveRole(role);
-    setError("");
-    setSuccess("");
   };
 
   return (
@@ -100,7 +64,7 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
 
       {/* Animated orbs */}
       <motion.div
-        className={`absolute w-[500px] h-[500px] rounded-full blur-3xl opacity-20 ${config.bgGlow}`}
+        className="absolute w-[500px] h-[500px] rounded-full blur-3xl opacity-20 bg-amber-500/20"
         animate={{
           x: [0, 100, -50, 0],
           y: [0, -80, 60, 0],
@@ -110,7 +74,7 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
         style={{ top: "-10%", left: "-10%" }}
       />
       <motion.div
-        className={`absolute w-[400px] h-[400px] rounded-full blur-3xl opacity-15 ${config.bgGlow}`}
+        className="absolute w-[400px] h-[400px] rounded-full blur-3xl opacity-15 bg-orange-500/15"
         animate={{
           x: [0, -80, 60, 0],
           y: [0, 100, -40, 0],
@@ -144,10 +108,14 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
       ))}
 
       {/* Grid lines overlay */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-        backgroundSize: '60px 60px'
-      }} />
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+          backgroundSize: "60px 60px",
+        }}
+      />
 
       {/* Main Login Card */}
       <motion.div
@@ -158,7 +126,7 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
       >
         {/* Glowing border effect */}
         <motion.div
-          className={`absolute -inset-[1px] rounded-3xl bg-gradient-to-r ${config.gradient} opacity-50 blur-sm`}
+          className="absolute -inset-[1px] rounded-3xl bg-gradient-to-r from-amber-500 to-orange-600 opacity-50 blur-sm"
           animate={{ opacity: [0.3, 0.6, 0.3] }}
           transition={{ duration: 3, repeat: Infinity }}
         />
@@ -172,10 +140,9 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
               transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
               className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 mb-4"
             >
-              <span className="text-3xl">{config.icon}</span>
+              <span className="text-3xl">🏪</span>
             </motion.div>
             <motion.h1
-              key={activeRole + "-title"}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="font-serif text-2xl font-bold text-white mb-1"
@@ -183,48 +150,19 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
               Welcome Back
             </motion.h1>
             <motion.p
-              key={activeRole + "-desc"}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
               className="text-sm text-gray-400"
             >
-              {config.description}
+              Sign in to access your account
             </motion.p>
           </div>
 
-          {/* Role Tabs */}
-          <div className="px-6 sm:px-8">
-            <div className="relative flex bg-white/5 rounded-2xl p-1 border border-white/5">
-              <motion.div
-                className={`absolute inset-y-1 w-[calc(33.33%-4px)] bg-gradient-to-r ${config.gradient} rounded-xl shadow-lg`}
-                animate={{
-                  x: activeRole === "customer" ? 4 : activeRole === "delivery" ? "calc(100% + 4px)" : "calc(200% + 4px)",
-                }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              />
-              {(Object.keys(roleConfig) as UserRole[]).map((role) => (
-                <button
-                  key={role}
-                  onClick={() => switchRole(role)}
-                  className={`relative z-10 flex-1 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-medium transition-colors duration-200 ${
-                    activeRole === role ? "text-white" : "text-gray-400 hover:text-gray-200"
-                  }`}
-                >
-                  <span className="hidden sm:inline">{roleConfig[role].label}</span>
-                  <span className="sm:hidden">{roleConfig[role].icon}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-6 sm:p-8 pt-6 space-y-5">
+          <form onSubmit={handleSubmit} className="p-6 sm:p-8 pt-4 space-y-5">
             {/* Email Field */}
-            <motion.div
-              layout
-              className="relative"
-            >
+            <div className="relative">
               <motion.label
                 className={`absolute left-4 transition-all duration-200 pointer-events-none ${
                   focusedField === "email" || email
@@ -240,15 +178,18 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError("");
+                }}
                 onFocus={() => setFocusedField("email")}
                 onBlur={() => setFocusedField(null)}
                 className="w-full px-4 pt-5 pb-2.5 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-white/30 focus:bg-white/[0.07] transition-all placeholder-transparent"
               />
-            </motion.div>
+            </div>
 
             {/* Password Field */}
-            <motion.div layout className="relative">
+            <div className="relative">
               <motion.label
                 className={`absolute left-4 transition-all duration-200 pointer-events-none ${
                   focusedField === "password" || password
@@ -261,7 +202,10 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError("");
+                }}
                 onFocus={() => setFocusedField("password")}
                 onBlur={() => setFocusedField(null)}
                 className="w-full px-4 pt-5 pb-2.5 pr-12 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-white/30 focus:bg-white/[0.07] transition-all placeholder-transparent"
@@ -273,16 +217,31 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
               >
                 {showPassword ? (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                    />
                   </svg>
                 ) : (
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
                   </svg>
                 )}
               </button>
-            </motion.div>
+            </div>
 
             {/* Forgot Password */}
             <div className="flex justify-end">
@@ -321,7 +280,7 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
               disabled={isLoading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`relative w-full py-3.5 rounded-xl font-medium text-white overflow-hidden transition-all duration-300 bg-gradient-to-r ${config.gradient} shadow-lg disabled:opacity-70`}
+              className="relative w-full py-3.5 rounded-xl font-medium text-white overflow-hidden transition-all duration-300 bg-gradient-to-r from-amber-500 to-orange-600 shadow-lg disabled:opacity-70"
             >
               <motion.div
                 className="absolute inset-0 bg-white/20"
@@ -343,7 +302,12 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
                   <>
                     Sign In
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
                     </svg>
                   </>
                 )}
@@ -380,7 +344,7 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
               <button
                 type="button"
                 onClick={onSwitchToSignup}
-                className={`font-medium bg-gradient-to-r ${config.gradient} bg-clip-text text-transparent hover:opacity-80 transition-opacity`}
+                className="font-medium bg-gradient-to-r from-amber-500 to-orange-600 bg-clip-text text-transparent hover:opacity-80 transition-opacity"
               >
                 Create Account
               </button>
