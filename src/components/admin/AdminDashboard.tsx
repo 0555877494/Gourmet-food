@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { useStore } from "../../context/StoreContext";
 
 export default function AdminDashboard() {
@@ -188,13 +189,71 @@ export default function AdminDashboard() {
               key={product.id}
               className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl"
             >
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">{product.image}</span>
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
                 <p className="text-xs text-gray-500">{product.sales} sold · ${product.revenue.toFixed(0)}</p>
               </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Revenue Chart */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="font-serif font-bold text-gray-900">Revenue Overview</h4>
+          <div className="flex gap-2">
+            <button className="px-3 py-1 text-xs bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200">Week</button>
+            <button className="px-3 py-1 text-xs bg-amber-800 text-white rounded-lg">Month</button>
+            <button className="px-3 py-1 text-xs bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200">Year</button>
+          </div>
+        </div>
+        <div className="flex items-end justify-between gap-2 h-48">
+          {[
+            { label: "Week 1", amount: 2450 },
+            { label: "Week 2", amount: 3120 },
+            { label: "Week 3", amount: 2890 },
+            { label: "Week 4", amount: 3680 },
+          ].map((week, i) => (
+            <div key={week.label} className="flex-1 flex flex-col items-center gap-2">
+              <span className="text-xs text-gray-500 font-medium">${week.amount}</span>
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: `${(week.amount / 4000) * 100}%` }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                className="w-full bg-gradient-to-t from-amber-600 to-amber-400 rounded-t-lg"
+              />
+              <span className="text-xs text-gray-400">{week.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Inventory Alerts */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-5">
+        <h4 className="font-serif font-bold text-gray-900 mb-4">Inventory Alerts</h4>
+        <div className="space-y-3">
+          {[
+            { product: "Persian Saffron Threads", stock: 12, status: "low", image: products[4]?.image || "" },
+            { product: "Mānuka Honey UMF 20+", stock: 8, status: "critical", image: products[2]?.image || "" },
+            { product: "25-Year Aged Balsamic Vinegar", stock: 15, status: "low", image: products[1]?.image || "" },
+          ].map((item) => (
+            <div key={item.product} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+              <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                <img src={item.image} alt={item.product} className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">{item.product}</p>
+                <p className="text-xs text-gray-500">{item.stock} units remaining</p>
+              </div>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                item.status === "critical" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"
+              }`}>
+                {item.status === "critical" ? "⚠️ Critical" : "📉 Low Stock"}
+              </span>
             </div>
           ))}
         </div>

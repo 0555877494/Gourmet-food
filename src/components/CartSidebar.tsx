@@ -52,8 +52,8 @@ export default function CartSidebar({ onClose, onCheckout }: CartSidebarProps) {
                   className="flex gap-4 p-3 bg-amber-50/50 rounded-xl border border-amber-100"
                 >
                   {/* Product Image */}
-                  <div className="w-16 h-16 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span className="text-3xl">{item.product.image}</span>
+                  <div className="w-16 h-16 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
                   </div>
 
                   {/* Product Info */}

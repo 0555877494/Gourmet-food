@@ -2,7 +2,14 @@ import { useState } from "react";
 import { useStore } from "../../context/StoreContext";
 import { Product, categories } from "../../data/products";
 
-const emojis = ["🫒", "🍇", "🍯", "🍫", "🌸", "💜", "🧀", "🍷", "🌶️", "🥖", "🫕", "🍵"];
+const defaultImages = [
+  "https://image.qwenlm.ai/generated-images/f4390f1e-bd84-4802-adff-5a5d77db0bfb/_result.png",
+  "https://image.qwenlm.ai/generated-images/8046cf83-ba56-41c6-a3e2-1af42da36c9f/_result.png",
+  "https://image.qwenlm.ai/generated-images/d6f7751c-fcc2-4d2e-aa75-4be8b27d9fe8/_result.png",
+  "https://image.qwenlm.ai/generated-images/0a7ed82d-7be5-4e3d-9751-b54c26a7/_result.png",
+  "https://image.qwenlm.ai/generated-images/98e0f85c-4f80-4841-88cc-13ed253578df/_result.png",
+  "https://image.qwenlm.ai/generated-images/b14ab4de-f5b5-47e1-ba52-78b5bfe8d57a/_result.png",
+];
 
 export default function AdminProducts() {
   const { products, addProduct, updateProduct, deleteProduct } = useStore();
@@ -83,8 +90,8 @@ export default function AdminProducts() {
                 <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <span className="text-xl">{product.image}</span>
+                      <div className="w-10 h-10 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate max-w-[200px]">
@@ -198,13 +205,13 @@ function ProductModal({ product, onClose, onSave }: ProductModalProps) {
     category: product?.category || categories[1],
     origin: product?.origin || "",
     weight: product?.weight || "",
-    image: product?.image || emojis[0],
+    image: product?.image || defaultImages[0],
     rating: product?.rating || 4.5,
     reviews: product?.reviews || 0,
     tags: product?.tags.join(", ") || "",
   });
 
-  const [selectedEmoji, setSelectedEmoji] = useState(product?.image || emojis[0]);
+  const [selectedImage, setSelectedImage] = useState(product?.image || defaultImages[0]);
 
   const handleChange = (field: string, value: string | number) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -221,7 +228,7 @@ function ProductModal({ product, onClose, onSave }: ProductModalProps) {
       category: form.category,
       origin: form.origin,
       weight: form.weight,
-      image: selectedEmoji,
+      image: selectedImage,
       rating: form.rating,
       reviews: form.reviews,
       tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
@@ -248,24 +255,27 @@ function ProductModal({ product, onClose, onSave }: ProductModalProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Emoji Picker */}
+          {/* Image Picker */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Product Icon</label>
-            <div className="flex flex-wrap gap-2">
-              {emojis.map((emoji) => (
-                <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => setSelectedEmoji(emoji)}
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl transition-all ${
-                    selectedEmoji === emoji
-                      ? "bg-amber-100 ring-2 ring-amber-400 scale-110"
-                      : "bg-gray-50 hover:bg-gray-100"
-                  }`}
-                >
-                  {emoji}
-                </button>
-              ))}
+            <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
+                {selectedImage ? (
+                  <img src={selectedImage} alt="Product" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-gray-400 text-xs">No image</span>
+                )}
+              </div>
+              <div className="flex-1">
+                <input
+                  type="text"
+                  value={selectedImage}
+                  onChange={(e) => setSelectedImage(e.target.value)}
+                  placeholder="Enter image URL"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+                />
+                <p className="text-xs text-gray-500 mt-1">Paste an image URL or leave as default</p>
+              </div>
             </div>
           </div>
 

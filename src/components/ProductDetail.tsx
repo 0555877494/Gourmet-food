@@ -42,10 +42,12 @@ export default function ProductDetail({ product, onClose }: ProductDetailProps) 
 
         <div className="grid md:grid-cols-2 gap-0">
           {/* Image Section */}
-          <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-8 sm:p-12 flex items-center justify-center min-h-[250px] md:min-h-[400px] rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none">
-            <span className="text-[100px] sm:text-[120px] md:text-[140px]">
-              {product.image}
-            </span>
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-0 flex items-center justify-center min-h-[250px] md:min-h-[400px] rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none overflow-hidden">
+            <img
+              src={product.image}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
           </div>
 
           {/* Details Section */}

@@ -179,7 +179,9 @@ function OrderDetailModal({
             <div className="space-y-2">
               {order.items.map((item, i) => (
                 <div key={i} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                  <span className="text-xl">{item.product.image}</span>
+                  <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                    <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 truncate">{item.product.name}</p>
                     <p className="text-xs text-gray-500">Qty: {item.quantity} × ${item.product.price.toFixed(2)}</p>

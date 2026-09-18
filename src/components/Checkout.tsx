@@ -208,8 +208,8 @@ export default function Checkout({ onClose }: CheckoutProps) {
               <div className="space-y-3 mb-4">
                 {items.map((item) => (
                   <div key={item.product.id} className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="text-xl">{item.product.image}</span>
+                    <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-amber-900 truncate">{item.product.name}</p>

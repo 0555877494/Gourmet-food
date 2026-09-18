@@ -65,6 +65,18 @@ const mockDeliveryJobs: DeliveryJob[] = [
     scheduledTime: "Today, 1:00 PM",
     priority: "express",
   },
+  {
+    id: "DJ-005",
+    orderId: "SV-F5R9T8",
+    customerName: "Charlotte Dubois",
+    customerAddress: "12 Rue de Rivoli, Paris, France",
+    items: ["Wild Lavender Honey Conserve ×2"],
+    distance: "1.8 mi",
+    earnings: 8.50,
+    status: "picked_up",
+    scheduledTime: "Today, 12:30 PM",
+    priority: "normal",
+  },
 ];
 
 export default function DeliveryDashboard() {
@@ -141,6 +153,88 @@ export default function DeliveryDashboard() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        {/* Map Visualization */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 p-4 sm:p-6 mb-6 relative overflow-hidden"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="font-bold text-emerald-900 flex items-center gap-2">
+                <span>🗺️</span> Live Delivery Map
+              </h3>
+              <p className="text-xs text-emerald-600">{activeJobs.length} active deliveries in your area</p>
+            </div>
+            <div className={`px-3 py-1.5 rounded-full text-xs font-medium ${isOnline ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+              {isOnline ? "🟢 Receiving jobs" : "⚪ Offline"}
+            </div>
+          </div>
+          {/* Simulated Map */}
+          <div className="relative h-32 sm:h-40 bg-gradient-to-br from-emerald-100/50 to-teal-100/50 rounded-xl border border-emerald-200/50 overflow-hidden">
+            {/* Grid pattern */}
+            <div className="absolute inset-0 opacity-20" style={{
+              backgroundImage: "linear-gradient(rgba(16,185,129,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(16,185,129,0.3) 1px, transparent 1px)",
+              backgroundSize: "30px 30px"
+            }} />
+            {/* Route lines */}
+            <svg className="absolute inset-0 w-full h-full">
+              <motion.path
+                d="M 50 80 Q 100 40 180 60 T 300 50"
+                stroke="rgb(16,185,129)"
+                strokeWidth="2"
+                fill="none"
+                strokeDasharray="5,5"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 2, delay: 0.5 }}
+              />
+              <motion.path
+                d="M 80 120 Q 150 80 220 100 T 350 70"
+                stroke="rgb(20,184,166)"
+                strokeWidth="2"
+                fill="none"
+                strokeDasharray="5,5"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 2, delay: 0.8 }}
+              />
+            </svg>
+            {/* Delivery pins */}
+            <motion.div
+              className="absolute top-[30%] left-[20%] w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white text-xs shadow-lg"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              📍
+            </motion.div>
+            <motion.div
+              className="absolute top-[50%] left-[55%] w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center text-white text-xs shadow-lg"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+            >
+              🚴
+            </motion.div>
+            <motion.div
+              className="absolute top-[25%] left-[75%] w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center text-white text-xs shadow-lg"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+            >
+              📦
+            </motion.div>
+            {/* You are here */}
+            <motion.div
+              className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-md flex items-center gap-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1 }}
+            >
+              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-xs font-medium text-emerald-800">Your location</span>
+            </motion.div>
+          </div>
+        </motion.div>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
           <motion.div
