@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { StoreProvider, useStore } from "./context/StoreContext";
 import { CartProvider, useCart } from "./context/CartContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import { Product } from "./data/products";
 import AnimatedLogin from "./components/auth/AnimatedLogin";
 import AnimatedSignup from "./components/auth/AnimatedSignup";
@@ -23,6 +24,8 @@ import Checkout from "./components/Checkout";
 import Footer from "./components/Footer";
 import BackToTop from "./components/BackToTop";
 import StaticPage from "./components/StaticPage";
+import { ProductGridSkeleton } from "./components/Skeleton";
+import { ScrollReveal, StaggerContainer, StaggerItem } from "./hooks/useScrollAnimation";
 
 // ============ AUTH SCREENS ============
 function AuthScreen() {
@@ -63,7 +66,14 @@ function StoreFront({ onGoToDashboard }: { onGoToDashboard: () => void }) {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { isCartOpen, setIsCartOpen } = useCart();
+
+  // Simulate loading for skeleton demo
+  useState(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1000);
+    return () => clearTimeout(timer);
+  });
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -128,45 +138,47 @@ function StoreFront({ onGoToDashboard }: { onGoToDashboard: () => void }) {
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
-          <div className="text-center max-w-3xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <span className="inline-block px-4 py-1.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full mb-4 tracking-wide uppercase">
-                ✨ Handpicked with Love
-              </span>
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-amber-900 mb-4 leading-tight">
-                Curated Provisions for the
-                <span className="text-amber-700"> Discerning Palate</span>
-              </h2>
-              <p className="text-amber-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-                Discover exceptional artisanal foods sourced from the world's finest producers.
-                Each item is hand-selected for quality, provenance, and extraordinary flavor.
-              </p>
-              <div className="flex items-center justify-center gap-6 mt-6 text-sm text-amber-600">
-                <span className="flex items-center gap-1.5">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Free shipping over $75
+          <ScrollReveal direction="up" delay={0.2}>
+            <div className="text-center max-w-3xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+              >
+                <span className="inline-block px-4 py-1.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full mb-4 tracking-wide uppercase">
+                  ✨ Handpicked with Love
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Ethically sourced
-                </span>
-                <span className="hidden sm:flex items-center gap-1.5">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Freshness guaranteed
-                </span>
-              </div>
-            </motion.div>
-          </div>
+                <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-amber-900 mb-4 leading-tight">
+                  Curated Provisions for the
+                  <span className="text-amber-700"> Discerning Palate</span>
+                </h2>
+                <p className="text-amber-600 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+                  Discover exceptional artisanal foods sourced from the world's finest producers.
+                  Each item is hand-selected for quality, provenance, and extraordinary flavor.
+                </p>
+                <div className="flex items-center justify-center gap-6 mt-6 text-sm text-amber-600">
+                  <span className="flex items-center gap-1.5">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Free shipping over $75
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Ethically sourced
+                  </span>
+                  <span className="hidden sm:flex items-center gap-1.5">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Freshness guaranteed
+                  </span>
+                </div>
+              </motion.div>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -187,16 +199,19 @@ function StoreFront({ onGoToDashboard }: { onGoToDashboard: () => void }) {
           />
         </div>
 
-        {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {isLoading ? (
+          <ProductGridSkeleton count={6} />
+        ) : filteredProducts.length > 0 ? (
+          <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onViewDetails={setSelectedProduct}
-              />
+              <StaggerItem key={product.id}>
+                <ProductCard
+                  product={product}
+                  onViewDetails={setSelectedProduct}
+                />
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         ) : (
           <div className="text-center py-16">
             <span className="text-6xl mb-4 block">🔍</span>
@@ -339,12 +354,14 @@ function CustomerDashboardWithStore({ onBrowseStore }: { onBrowseStore: () => vo
 // ============ APP ROOT ============
 export default function App() {
   return (
-    <AuthProvider>
-      <StoreProvider>
-        <CartProvider>
-          <AppRouter />
-        </CartProvider>
-      </StoreProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <StoreProvider>
+          <CartProvider>
+            <AppRouter />
+          </CartProvider>
+        </StoreProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

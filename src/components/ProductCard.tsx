@@ -11,12 +11,21 @@ interface ProductCardProps {
 export default function ProductCard({ product, onViewDetails }: ProductCardProps) {
   const { addToCart } = useCart();
   const [added, setAdded] = useState(false);
+  const [flyAnimation, setFlyAnimation] = useState(false);
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
-    addToCart(product);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
+    
+    // Trigger fly animation
+    setFlyAnimation(true);
+    
+    // Add to cart after animation starts
+    setTimeout(() => {
+      addToCart(product);
+      setAdded(true);
+      setFlyAnimation(false);
+      setTimeout(() => setAdded(false), 1500);
+    }, 400);
   };
 
   return (
@@ -34,10 +43,18 @@ export default function ProductCard({ product, onViewDetails }: ProductCardProps
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700 ease-out"
         />
-        {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {/* Zoom lens effect */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
+        {/* Magnifying glass icon */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 scale-50 group-hover:scale-100">
+          <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-white/40">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+            </svg>
+          </div>
+        </div>
         
         {/* Category badge */}
         <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1 text-xs font-medium text-amber-700 border border-amber-200">
@@ -119,7 +136,7 @@ export default function ProductCard({ product, onViewDetails }: ProductCardProps
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={handleAdd}
-            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 shadow-sm hover:shadow-md ${
+            className={`relative flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 shadow-sm hover:shadow-md ${
               added
                 ? "bg-green-600 text-white"
                 : "bg-amber-800 hover:bg-amber-900 text-white"
@@ -127,9 +144,16 @@ export default function ProductCard({ product, onViewDetails }: ProductCardProps
           >
             {added ? (
               <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <motion.svg
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+                </motion.svg>
                 Added!
               </>
             ) : (
@@ -139,6 +163,26 @@ export default function ProductCard({ product, onViewDetails }: ProductCardProps
                 </svg>
                 Add
               </>
+            )}
+            
+            {/* Flying product animation */}
+            {flyAnimation && (
+              <motion.div
+                initial={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+                animate={{
+                  opacity: [1, 1, 0],
+                  scale: [1, 0.5, 0.3],
+                  x: [0, window.innerWidth / 2, window.innerWidth - 100],
+                  y: [0, -window.innerHeight / 2, -window.innerHeight + 100],
+                }}
+                transition={{ duration: 0.6, ease: "easeInOut" }}
+                className="absolute z-50 pointer-events-none"
+                style={{ top: '50%', left: '50%' }}
+              >
+                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-amber-400 shadow-lg">
+                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                </div>
+              </motion.div>
             )}
           </motion.button>
         </div>
