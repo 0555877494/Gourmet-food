@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 import { Product } from "../data/products";
+import { useStore } from "./StoreContext";
 
 export interface CartItem {
   product: Product;
@@ -21,6 +22,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { products } = useStore();
   const [items, setItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
@@ -47,9 +49,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeFromCart(productId);
       return;
     }
+    // Get latest product data from store
+    const latestProduct = products.find((p) => p.id === productId);
     setItems((prev) =>
       prev.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
+        item.product.id === productId
+          ? { ...item, quantity, product: latestProduct || item.product }
+          : item
       )
     );
   };

@@ -1,14 +1,23 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { StoreProvider, useStore } from "./context/StoreContext";
 import { CartProvider, useCart } from "./context/CartContext";
-import { products, Product } from "./data/products";
+import { Product } from "./data/products";
 import Header from "./components/Header";
 import CategoryFilter from "./components/CategoryFilter";
 import ProductCard from "./components/ProductCard";
 import ProductDetail from "./components/ProductDetail";
 import CartSidebar from "./components/CartSidebar";
 import Checkout from "./components/Checkout";
+import AdminLogin from "./components/admin/AdminLogin";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./components/admin/AdminDashboard";
+import AdminProducts from "./components/admin/AdminProducts";
+import AdminOrders from "./components/admin/AdminOrders";
+import AdminCustomers from "./components/admin/AdminCustomers";
+import AdminSettings from "./components/admin/AdminSettings";
 
-function AppContent() {
+function StoreFront() {
+  const { products } = useStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -29,7 +38,7 @@ function AppContent() {
 
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, products]);
 
   const handleCheckout = () => {
     setIsCartOpen(false);
@@ -62,14 +71,12 @@ function AppContent() {
             </p>
           </div>
         </div>
-        {/* Decorative elements */}
         <div className="absolute top-10 left-10 text-4xl opacity-10 animate-pulse">🌿</div>
         <div className="absolute bottom-10 right-10 text-4xl opacity-10 animate-pulse">✨</div>
       </section>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        {/* Filters Section */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <h3 className="font-serif text-xl sm:text-2xl font-bold text-amber-900">
@@ -85,7 +92,6 @@ function AppContent() {
           />
         </div>
 
-        {/* Products Grid */}
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map((product) => (
@@ -148,8 +154,19 @@ function AppContent() {
               </ul>
             </div>
           </div>
-          <div className="mt-8 pt-6 border-t border-amber-800 text-center text-xs text-amber-400">
-            © 2026 Saveur & Co. All rights reserved. This is a demo store.
+          <div className="mt-8 pt-6 border-t border-amber-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs text-amber-400">
+              © 2026 Saveur & Co. All rights reserved.
+            </p>
+            <button
+              onClick={() => window.location.hash = "admin"}
+              className="text-xs text-amber-500 hover:text-amber-300 transition-colors flex items-center gap-1"
+            >
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Admin Panel
+            </button>
           </div>
         </div>
       </footer>
@@ -176,10 +193,85 @@ function AppContent() {
   );
 }
 
+function AdminPanel({ onLogout, onViewStore }: { onLogout: () => void; onViewStore: () => void }) {
+  const [currentPage, setCurrentPage] = useState("dashboard");
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case "dashboard":
+        return <AdminDashboard />;
+      case "products":
+        return <AdminProducts />;
+      case "orders":
+        return <AdminOrders />;
+      case "customers":
+        return <AdminCustomers />;
+      case "settings":
+        return <AdminSettings />;
+      default:
+        return <AdminDashboard />;
+    }
+  };
+
+  return (
+    <AdminLayout
+      currentPage={currentPage}
+      onPageChange={setCurrentPage}
+      onLogout={onLogout}
+      onViewStore={onViewStore}
+    >
+      {renderPage()}
+    </AdminLayout>
+  );
+}
+
+function AppRouter() {
+  const [view, setView] = useState<"store" | "admin-login" | "admin">(() => {
+    return window.location.hash === "#admin" ? "admin-login" : "store";
+  });
+
+  const handleLogin = () => {
+    setView("admin");
+  };
+
+  const handleLogout = () => {
+    window.location.hash = "";
+    setView("store");
+  };
+
+  const handleBackToStore = () => {
+    window.location.hash = "";
+    setView("store");
+  };
+
+  // Listen for hash changes
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (window.location.hash === "#admin" && view === "store") {
+        setView("admin-login");
+      }
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, [view]);
+
+  if (view === "admin-login") {
+    return <AdminLogin onLogin={handleLogin} onBack={handleBackToStore} />;
+  }
+
+  if (view === "admin") {
+    return <AdminPanel onLogout={handleLogout} onViewStore={handleBackToStore} />;
+  }
+
+  return <StoreFront />;
+}
+
 export default function App() {
   return (
-    <CartProvider>
-      <AppContent />
-    </CartProvider>
+    <StoreProvider>
+      <CartProvider>
+        <AppRouter />
+      </CartProvider>
+    </StoreProvider>
   );
 }
