@@ -1,23 +1,61 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { StoreProvider, useStore } from "./context/StoreContext";
 import { CartProvider, useCart } from "./context/CartContext";
 import { Product } from "./data/products";
-import Header from "./components/Header";
-import CategoryFilter from "./components/CategoryFilter";
-import ProductCard from "./components/ProductCard";
-import ProductDetail from "./components/ProductDetail";
-import CartSidebar from "./components/CartSidebar";
-import Checkout from "./components/Checkout";
-import AdminLogin from "./components/admin/AdminLogin";
+import AnimatedLogin from "./components/auth/AnimatedLogin";
+import AnimatedSignup from "./components/auth/AnimatedSignup";
+import CustomerDashboard from "./components/customer/CustomerDashboard";
+import DeliveryDashboard from "./components/delivery/DeliveryDashboard";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import AdminProducts from "./components/admin/AdminProducts";
 import AdminOrders from "./components/admin/AdminOrders";
 import AdminCustomers from "./components/admin/AdminCustomers";
 import AdminSettings from "./components/admin/AdminSettings";
+import Header from "./components/Header";
+import CategoryFilter from "./components/CategoryFilter";
+import ProductCard from "./components/ProductCard";
+import ProductDetail from "./components/ProductDetail";
+import CartSidebar from "./components/CartSidebar";
+import Checkout from "./components/Checkout";
 
-function StoreFront() {
+// ============ AUTH SCREENS ============
+function AuthScreen() {
+  const [mode, setMode] = useState<"login" | "signup">("login");
+
+  return (
+    <AnimatePresence mode="wait">
+      {mode === "login" ? (
+        <motion.div
+          key="login"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, x: -50 }}
+          transition={{ duration: 0.3 }}
+        >
+          <AnimatedLogin onSwitchToSignup={() => setMode("signup")} />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="signup"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0, x: 50 }}
+          transition={{ duration: 0.3 }}
+        >
+          <AnimatedSignup onSwitchToLogin={() => setMode("login")} />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ============ STORE FRONT ============
+function StoreFront({ onGoToDashboard }: { onGoToDashboard: () => void }) {
   const { products } = useStore();
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -45,10 +83,6 @@ function StoreFront() {
     setShowCheckout(true);
   };
 
-  const handleCloseCheckout = () => {
-    setShowCheckout(false);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50/50 via-white to-orange-50/30">
       <Header
@@ -56,6 +90,27 @@ function StoreFront() {
         onSearchChange={setSearchQuery}
         onCartClick={() => setIsCartOpen(true)}
       />
+
+      {/* User Welcome Bar */}
+      <div className="bg-amber-50 border-b border-amber-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm">{user?.avatar}</span>
+            <span className="text-xs text-amber-700">
+              Shopping as <span className="font-semibold">{user?.name}</span>
+            </span>
+          </div>
+          <button
+            onClick={onGoToDashboard}
+            className="text-xs text-amber-600 hover:text-amber-800 font-medium flex items-center gap-1 transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            My Dashboard
+          </button>
+        </div>
+      </div>
 
       {/* Hero Section */}
       <section className="relative overflow-hidden">
@@ -154,19 +209,8 @@ function StoreFront() {
               </ul>
             </div>
           </div>
-          <div className="mt-8 pt-6 border-t border-amber-800 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-amber-400">
-              © 2026 Saveur & Co. All rights reserved.
-            </p>
-            <button
-              onClick={() => window.location.hash = "admin"}
-              className="text-xs text-amber-500 hover:text-amber-300 transition-colors flex items-center gap-1"
-            >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-              Admin Panel
-            </button>
+          <div className="mt-8 pt-6 border-t border-amber-800 text-center text-xs text-amber-400">
+            © 2026 Saveur & Co. All rights reserved.
           </div>
         </div>
       </footer>
@@ -187,29 +231,25 @@ function StoreFront() {
       )}
 
       {showCheckout && (
-        <Checkout onClose={handleCloseCheckout} />
+        <Checkout onClose={() => setShowCheckout(false)} />
       )}
     </div>
   );
 }
 
-function AdminPanel({ onLogout, onViewStore }: { onLogout: () => void; onViewStore: () => void }) {
+// ============ ADMIN PANEL ============
+function AdminPanel() {
   const [currentPage, setCurrentPage] = useState("dashboard");
+  const { logout } = useAuth();
 
   const renderPage = () => {
     switch (currentPage) {
-      case "dashboard":
-        return <AdminDashboard />;
-      case "products":
-        return <AdminProducts />;
-      case "orders":
-        return <AdminOrders />;
-      case "customers":
-        return <AdminCustomers />;
-      case "settings":
-        return <AdminSettings />;
-      default:
-        return <AdminDashboard />;
+      case "dashboard": return <AdminDashboard />;
+      case "products": return <AdminProducts />;
+      case "orders": return <AdminOrders />;
+      case "customers": return <AdminCustomers />;
+      case "settings": return <AdminSettings />;
+      default: return <AdminDashboard />;
     }
   };
 
@@ -217,61 +257,68 @@ function AdminPanel({ onLogout, onViewStore }: { onLogout: () => void; onViewSto
     <AdminLayout
       currentPage={currentPage}
       onPageChange={setCurrentPage}
-      onLogout={onLogout}
-      onViewStore={onViewStore}
+      onLogout={logout}
     >
       {renderPage()}
     </AdminLayout>
   );
 }
 
+// ============ MAIN ROUTER ============
 function AppRouter() {
-  const [view, setView] = useState<"store" | "admin-login" | "admin">(() => {
-    return window.location.hash === "#admin" ? "admin-login" : "store";
-  });
+  const { isAuthenticated, user } = useAuth();
+  const [showStore, setShowStore] = useState(false);
 
-  const handleLogin = () => {
-    setView("admin");
-  };
+  // If not authenticated, show auth screens
+  if (!isAuthenticated) {
+    return <AuthScreen />;
+  }
 
-  const handleLogout = () => {
-    window.location.hash = "";
-    setView("store");
-  };
-
-  const handleBackToStore = () => {
-    window.location.hash = "";
-    setView("store");
-  };
-
-  // Listen for hash changes
-  useEffect(() => {
-    const handleHashChange = () => {
-      if (window.location.hash === "#admin" && view === "store") {
-        setView("admin-login");
+  // Route based on role
+  switch (user?.role) {
+    case "admin":
+      return <AdminPanel />;
+    case "delivery":
+      return <DeliveryDashboard />;
+    case "customer":
+      if (showStore) {
+        return <StoreFront onGoToDashboard={() => setShowStore(false)} />;
       }
-    };
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
-  }, [view]);
-
-  if (view === "admin-login") {
-    return <AdminLogin onLogin={handleLogin} onBack={handleBackToStore} />;
+      return <CustomerDashboardWithStore onBrowseStore={() => setShowStore(true)} />;
+    default:
+      return <AuthScreen />;
   }
-
-  if (view === "admin") {
-    return <AdminPanel onLogout={handleLogout} onViewStore={handleBackToStore} />;
-  }
-
-  return <StoreFront />;
 }
 
+// Customer Dashboard with option to browse store
+function CustomerDashboardWithStore({ onBrowseStore }: { onBrowseStore: () => void }) {
+  return (
+    <div>
+      <CustomerDashboard />
+      {/* Floating Browse Store Button */}
+      <motion.button
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.5, type: "spring" }}
+        onClick={onBrowseStore}
+        className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-5 py-3 bg-amber-800 hover:bg-amber-900 text-white rounded-full shadow-xl hover:shadow-2xl transition-all"
+      >
+        <span>🏪</span>
+        <span className="text-sm font-medium">Browse Store</span>
+      </motion.button>
+    </div>
+  );
+}
+
+// ============ APP ROOT ============
 export default function App() {
   return (
-    <StoreProvider>
-      <CartProvider>
-        <AppRouter />
-      </CartProvider>
-    </StoreProvider>
+    <AuthProvider>
+      <StoreProvider>
+        <CartProvider>
+          <AppRouter />
+        </CartProvider>
+      </StoreProvider>
+    </AuthProvider>
   );
 }
