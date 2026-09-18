@@ -138,9 +138,13 @@ export default function AnimatedLogin({ onSwitchToSignup }: AnimatedLoginProps) 
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 200, delay: 0.3 }}
-              className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 mb-4"
+              className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 mb-4 overflow-hidden"
             >
-              <span className="text-3xl">🏪</span>
+              <img 
+                src="https://image.qwenlm.ai/generated-images/0ac7ab97-8192-4258-b440-253435684dd5/_result.png" 
+                alt="Saveur & Co." 
+                className="w-full h-full object-cover"
+              />
             </motion.div>
             <motion.h1
               initial={{ opacity: 0, y: -10 }}
