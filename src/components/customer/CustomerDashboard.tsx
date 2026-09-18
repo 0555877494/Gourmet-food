@@ -119,7 +119,11 @@ export default function CustomerDashboard() {
       <header className="bg-white/95 backdrop-blur-sm border-b border-amber-100 sticky top-0 z-30">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🏪</span>
+            <img 
+              src="https://image.qwenlm.ai/generated-images/0ac7ab97-8192-4258-b440-253435684dd5/_result.png" 
+              alt="Saveur & Co." 
+              className="h-8 w-auto"
+            />
             <div>
               <h1 className="text-sm font-serif font-bold text-amber-900">Saveur & Co.</h1>
               <p className="text-xs text-amber-500">My Account</p>

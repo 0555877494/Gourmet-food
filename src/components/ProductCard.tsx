@@ -11,12 +11,21 @@ interface ProductCardProps {
 export default function ProductCard({ product, onViewDetails }: ProductCardProps) {
   const { addToCart } = useCart();
   const [added, setAdded] = useState(false);
+  const [flyAnimation, setFlyAnimation] = useState(false);
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
-    addToCart(product);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1500);
+    
+    // Trigger fly animation
+    setFlyAnimation(true);
+    
+    // Add to cart after animation starts
+    setTimeout(() => {
+      addToCart(product);
+      setAdded(true);
+      setFlyAnimation(false);
+      setTimeout(() => setAdded(false), 1500);
+    }, 400);
   };
 
   return (
@@ -34,15 +43,68 @@ export default function ProductCard({ product, onViewDetails }: ProductCardProps
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700 ease-out"
         />
-        {/* Overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        
-        {/* Category badge */}
-        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1 text-xs font-medium text-amber-700 border border-amber-200">
-          {product.category}
+        {/* Zoom lens effect */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
+        {/* Magnifying glass icon */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 scale-50 group-hover:scale-100">
+          <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-white/40">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+            </svg>
+          </div>
         </div>
+        
+        {/* Product Badge */}
+        {product.badge && (
+          <div className="absolute top-3 left-3">
+            {product.badge === 'new' && (
+              <span className="px-2 py-1 bg-blue-500 text-white text-xs font-bold rounded-full shadow-lg">
+                ✨ NEW
+              </span>
+            )}
+            {product.badge === 'sale' && (
+              <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg">
+                🔥 SALE
+              </span>
+            )}
+            {product.badge === 'bestseller' && (
+              <span className="px-2 py-1 bg-amber-500 text-white text-xs font-bold rounded-full shadow-lg">
+                ⭐ BESTSELLER
+              </span>
+            )}
+            {product.badge === 'limited' && (
+              <span className="px-2 py-1 bg-purple-500 text-white text-xs font-bold rounded-full shadow-lg">
+                💎 LIMITED
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Discount Badge */}
+        {product.discount && (
+          <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold rounded-full px-2 py-1 shadow-lg">
+            -{product.discount}%
+          </div>
+        )}
+
+        {/* Rating badge (if no discount) */}
+        {!product.discount && (
+          <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
+            <svg className="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+            <span className="text-xs font-medium text-amber-700">{product.rating}</span>
+          </div>
+        )}
+
+        {/* Low Stock Warning */}
+        {product.stock < 10 && product.stock > 0 && (
+          <div className="absolute bottom-3 left-3 bg-orange-500/90 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded-full">
+            ⚠️ Only {product.stock} left!
+          </div>
+        )}
 
         {/* Quick view button */}
         <motion.button
@@ -56,14 +118,6 @@ export default function ProductCard({ product, onViewDetails }: ProductCardProps
         >
           Quick View
         </motion.button>
-
-        {/* Rating badge */}
-        <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
-          <svg className="w-3 h-3 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-          <span className="text-xs font-medium text-amber-700">{product.rating}</span>
-        </div>
       </div>
 
       {/* Product Info */}
@@ -111,6 +165,11 @@ export default function ProductCard({ product, onViewDetails }: ProductCardProps
         {/* Price & Add to Cart */}
         <div className="flex items-center justify-between mt-auto pt-3 border-t border-amber-50">
           <div>
+            {product.originalPrice && (
+              <span className="text-sm text-gray-400 line-through mr-2">
+                ${product.originalPrice.toFixed(2)}
+              </span>
+            )}
             <span className="text-xl font-bold text-amber-900">
               ${product.price.toFixed(2)}
             </span>
@@ -119,7 +178,7 @@ export default function ProductCard({ product, onViewDetails }: ProductCardProps
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={handleAdd}
-            className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 shadow-sm hover:shadow-md ${
+            className={`relative flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 shadow-sm hover:shadow-md ${
               added
                 ? "bg-green-600 text-white"
                 : "bg-amber-800 hover:bg-amber-900 text-white"
@@ -127,9 +186,16 @@ export default function ProductCard({ product, onViewDetails }: ProductCardProps
           >
             {added ? (
               <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <motion.svg
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
+                </motion.svg>
                 Added!
               </>
             ) : (
@@ -139,6 +205,26 @@ export default function ProductCard({ product, onViewDetails }: ProductCardProps
                 </svg>
                 Add
               </>
+            )}
+            
+            {/* Flying product animation */}
+            {flyAnimation && (
+              <motion.div
+                initial={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+                animate={{
+                  opacity: [1, 1, 0],
+                  scale: [1, 0.5, 0.3],
+                  x: [0, window.innerWidth / 2, window.innerWidth - 100],
+                  y: [0, -window.innerHeight / 2, -window.innerHeight + 100],
+                }}
+                transition={{ duration: 0.6, ease: "easeInOut" }}
+                className="absolute z-50 pointer-events-none"
+                style={{ top: '50%', left: '50%' }}
+              >
+                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-amber-400 shadow-lg">
+                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                </div>
+              </motion.div>
             )}
           </motion.button>
         </div>

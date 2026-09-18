@@ -71,7 +71,11 @@ export default function Footer({ onNavigate }: FooterProps) {
           {/* Brand */}
           <div className="col-span-2 md:col-span-4 lg:col-span-1">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-2xl">🏪</span>
+              <img 
+                src="https://image.qwenlm.ai/generated-images/0ac7ab97-8192-4258-b440-253435684dd5/_result.png" 
+                alt="Saveur & Co." 
+                className="h-8 w-auto"
+              />
               <h4 className="font-serif text-lg font-bold text-white">Saveur & Co.</h4>
             </div>
             <p className="text-sm text-amber-300 leading-relaxed mb-4">

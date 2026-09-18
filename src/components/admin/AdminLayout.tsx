@@ -39,7 +39,11 @@ export default function AdminLayout({ children, currentPage, onPageChange, onLog
         {/* Logo */}
         <div className="p-5 border-b border-amber-800">
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🏪</span>
+            <img 
+              src="https://image.qwenlm.ai/generated-images/0ac7ab97-8192-4258-b440-253435684dd5/_result.png" 
+              alt="Saveur & Co." 
+              className="h-10 w-auto"
+            />
             <div>
               <h1 className="font-serif text-lg font-bold text-white">Saveur & Co.</h1>
               <p className="text-xs text-amber-300">Admin Panel</p>
@@ -119,7 +123,11 @@ export default function AdminLayout({ children, currentPage, onPageChange, onLog
               onClick={onViewStore}
               className="hidden sm:flex items-center gap-2 px-3 py-2 bg-amber-50 text-amber-700 rounded-xl text-sm font-medium hover:bg-amber-100 transition-colors"
             >
-              <span>🏪</span>
+              <img 
+                src="https://image.qwenlm.ai/generated-images/0ac7ab97-8192-4258-b440-253435684dd5/_result.png" 
+                alt="" 
+                className="h-4 w-auto"
+              />
               View Store
             </button>
           </div>
